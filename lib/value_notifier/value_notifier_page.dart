@@ -1,31 +1,29 @@
-import 'package:academia_do_flutter/widgets/imc_gauge.dart';
 import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class ImcSetStatePage extends StatefulWidget {
-  const ImcSetStatePage({super.key});
+import '../widgets/imc_gauge.dart';
+
+class ImcValueNotifierPage extends StatefulWidget {
+  const ImcValueNotifierPage({super.key});
 
   @override
-  State<ImcSetStatePage> createState() => _ImcSetStatePageState();
+  State<ImcValueNotifierPage> createState() => _ImcValueNotifierPageState();
 }
 
-class _ImcSetStatePageState extends State<ImcSetStatePage> {
+class _ImcValueNotifierPageState extends State<ImcValueNotifierPage> {
   TextEditingController pesoController = TextEditingController();
   TextEditingController alturaController = TextEditingController();
   final formKey = GlobalKey<FormState>();
-  var imc = 0.0;
+  var imc = ValueNotifier(0.0);
 
   Future<void> _calcularImc(
       {required double peso, required double altura}) async {
-    setState(() {
-      imc = 0;
-    });
+    imc.value = 0;
 
     await Future.delayed(const Duration(seconds: 1));
-    setState(() {
-      imc = peso / (altura * altura);
-    });
+
+    imc.value = peso / (altura * altura);
   }
 
   @override
@@ -39,13 +37,18 @@ class _ImcSetStatePageState extends State<ImcSetStatePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Imc SetState'),
+        title: const Text('Imc ValueNotifier'),
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            ImcGauge(
-              imc: imc,
+            ValueListenableBuilder<double>(
+              valueListenable: imc,
+              builder: (_, imcValue, __) {
+                return ImcGauge(
+                  imc: imcValue,
+                );
+              },
             ),
             const SizedBox(height: 20),
             Padding(
@@ -104,8 +107,9 @@ class _ImcSetStatePageState extends State<ImcSetStatePage> {
                     const SizedBox(height: 30),
                     ElevatedButton(
                       onPressed: () {
-                        var formValid = formKey.currentState?.validate() ?? false;
-        
+                        var formValid =
+                            formKey.currentState?.validate() ?? false;
+
                         if (formValid) {
                           var formatter = NumberFormat.simpleCurrency(
                             locale: 'pt_BR',
@@ -113,7 +117,7 @@ class _ImcSetStatePageState extends State<ImcSetStatePage> {
                           );
                           double peso =
                               formatter.parse(pesoController.text) as double;
-        
+
                           double altura =
                               formatter.parse(alturaController.text) as double;
                           _calcularImc(peso: peso, altura: altura);
