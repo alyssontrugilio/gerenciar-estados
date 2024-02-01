@@ -3,5 +3,10 @@ class ImcState {
   final double imc;
   ImcState({
     required this.imc,
-  }); 
+  });
+}
+
+class ImcStateLoadgin extends ImcState {
+  ImcStateLoadgin() : super(imc: 0);
+  
 }

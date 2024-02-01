@@ -1,4 +1,5 @@
 import 'package:academia_do_flutter/bloc_pattern/imc_bloc_pattern_controller.dart';
+import 'package:academia_do_flutter/bloc_pattern/imc_state.dart';
 import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -30,13 +31,31 @@ class _ImcBlocPatternPageState extends State<ImcBlocPatternPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Imc ChangeNotifier'),
+        title: const Text('Imc Bloc Pattern'),
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            const ImcGauge(imc: 0),
-            const SizedBox(height: 20),
+            StreamBuilder<ImcState>(
+              stream: controller.imcOut,
+              builder: (context, snapshot) {
+                var imc = snapshot.data?.imc ?? 0;
+
+                return ImcGauge(imc: imc);
+              },
+            ),
+            const SizedBox(height: 10),
+            StreamBuilder<ImcState>(
+              stream: controller.imcOut,
+              builder: (context, snapshot) {
+                return Visibility(
+                    visible: snapshot.data is ImcStateLoadgin,
+                    child: const Center(
+                      child: CircularProgressIndicator(),
+                    ));
+              },
+            ),
+            const SizedBox(height: 10),
             Padding(
               padding: const EdgeInsets.all(16),
               child: Form(
@@ -107,7 +126,7 @@ class _ImcBlocPatternPageState extends State<ImcBlocPatternPage> {
                           double altura =
                               formatter.parse(alturaController.text) as double;
 
-                          // controller.calcularImc(altura, peso);
+                          controller.calcularImc(peso: peso, altura: altura);
                         }
                       },
                       child: const Text('Calcular IMC'),
